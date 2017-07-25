@@ -1,33 +1,45 @@
 package com.quangtd95.databinding;
 
 import android.databinding.DataBindingUtil;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
+import android.databinding.ObservableField;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.widget.Toast;
 
 import com.quangtd95.databinding.databinding.ActivityMainBinding;
 import com.quangtd95.databinding.model.User;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity implements ListUserAdapter.OnItemClickListener {
+    private ObservableField<String> title = new ObservableField<>();
+    private ListUserAdapter listUserAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        User user = new User("Thai Duy ", "Quang");
-        binding.setUser(user);
-        new Handler().postDelayed(() -> changeFirstName(user), 2000);
-        new Handler().postDelayed(() -> changeLastName(user), 4000);
+        title.set("Example data binding Recycler View");
+        binding.setMain(this);
+        setData();
+        binding.recycleView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        binding.recycleView.setAdapter(listUserAdapter);
     }
 
-    private void changeFirstName(User user) {
-//        user.setFirstName(user.getFirstName() + " -> Ho");
-        user.firstName.set(user.firstName.get()+" -> Ho");
+    private void setData() {
+        List<User> users = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            User user = new User("firstName " + i, "lastName " + i);
+            users.add(user);
+        }
+        listUserAdapter = new ListUserAdapter(users);
+        listUserAdapter.setOnItemClickListener(this);
     }
 
-    private void changeLastName(User user) {
-//        user.setLastName(user.getLastName() + " -> Ten");
-        user.lastName.set(user.lastName.get()+" -> Ten");
+    @Override public void itemClick(User user) {
+        Toast.makeText(this, "onClick " + user.firstName, Toast.LENGTH_SHORT).show();
     }
 }
